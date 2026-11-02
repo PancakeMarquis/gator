@@ -8,11 +8,11 @@ type command struct {
 }
 
 type commands struct {
-	list map[string]func(*state, command) error
+	registeredCommands map[string]func(*state, command) error
 }
 
 func (c *commands) run(s *state, cmd command) error {
-	handler, ok := c.list[cmd.name]
+	handler, ok := c.registeredCommands[cmd.name]
 	if !ok {
 		return errors.New("Command does not exist")
 	}
@@ -24,5 +24,5 @@ func (c *commands) run(s *state, cmd command) error {
 }
 
 func (c *commands) register(name string, f func(*state, command) error) {
-	c.list[name] = f
+	c.registeredCommands[name] = f
 }
