@@ -23,12 +23,24 @@ func handlerAddFeed(s *state, cmd command) error {
 	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{ID: uuid.New(), CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC(), Name: name, Url: url, UserID: user.ID})
 
 	if err != nil {
-		return fmt.Errorf("couldn't create feed: %w", err)
+		return fmt.Errorf("Couldn't create feed: %w", err)
+	}
+	feedFollow, err := s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+	})
+	if err != nil {
+		return fmt.Errorf("Couldn't create feedFollow record: %w", err)
 	}
 
 	fmt.Println("Feed created successfully:")
 	printFeed(feed)
 	fmt.Println()
+	fmt.Println("Feed followed successfully:")
+	printFeedFollow(feedFollow.UserName, feedFollow.FeedName)
 	fmt.Println("=====================================")
 
 	return nil
@@ -37,7 +49,7 @@ func handlerAddFeed(s *state, cmd command) error {
 func handlerListFeeds(s *state, cmd command) error {
 	feeds, err := s.db.GetFeeds(context.Background())
 	if err != nil {
-		return fmt.Errorf("couldn't get feeds: %w", err)
+		return fmt.Errorf("Couldn't get feeds: %w", err)
 	}
 	if len(feeds) == 0 {
 		fmt.Println("No feeds found.")

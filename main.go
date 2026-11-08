@@ -41,6 +41,8 @@ func main() {
 	cmds.register("agg", handlerAgg)
 	cmds.register("addfeed", handlerAddFeed)
 	cmds.register("feeds", handlerListFeeds)
+	cmds.register("follow", handlerFeedFollow)
+	cmds.register("following", handlerListFeedFollow)
 
 	s.db = dbQueries
 
