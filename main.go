@@ -43,6 +43,7 @@ func main() {
 	cmds.register("feeds", handlerListFeeds)
 	cmds.register("follow", middlewareLoggedIn(handlerFeedFollow))
 	cmds.register("following", middlewareLoggedIn(handlerListFeedFollow))
+	cmds.register("unfollow", middlewareLoggedIn(handlerUnfollowFeedFollow))
 
 	s.db = dbQueries
 
