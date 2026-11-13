@@ -5,8 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/pancakemarquis/gator/internal/database"
 )
 
@@ -48,8 +50,33 @@ func scrapFeeds(s *state) {
 	}
 
 	for _, item := range feeds.Channel.Item {
-		fmt.Printf("Found post: %s\n", item.Title)
+		publishedAt := sql.NullTime{}
+		pubDate, err := time.Parse(time.RFC1123Z, fmt.Sprint(item.PubDate))
+		if err != nil {
+			log.Printf("Couldn't parse published date  %v", err)
+		} else {
+			publishedAt.Time = pubDate
+			publishedAt.Valid = true
+		}
+		_, err = s.db.CreatePost(context.Background(), database.CreatePostParams{
+			ID:          uuid.New(),
+			CreatedAt:   time.Now().UTC(),
+			UpdatedAt:   time.Now().UTC(),
+			Title:       item.Title,
+			Url:         item.Link,
+			Description: sql.NullString{String: item.Description, Valid: true},
+			PublishedAt: sql.NullTime{Time: publishedAt.Time, Valid: publishedAt.Valid},
+			FeedID:      nextFeed.ID,
+		})
+		if err != nil {
+			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+				log.Printf("Post with Url already exists")
+				continue
+			} else {
+				log.Printf("Couldn't create post: %v", err)
+				return
+			}
+		}
 	}
-	log.Printf("Feed %s collected, %v posts found", nextFeed.Name, len(feeds.Channel.Item))
 
 }

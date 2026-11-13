@@ -44,6 +44,7 @@ func main() {
 	cmds.register("follow", middlewareLoggedIn(handlerFeedFollow))
 	cmds.register("following", middlewareLoggedIn(handlerListFeedFollow))
 	cmds.register("unfollow", middlewareLoggedIn(handlerUnfollowFeedFollow))
+	cmds.register("browse", middlewareLoggedIn(handlerBrowse))
 
 	s.db = dbQueries
 
